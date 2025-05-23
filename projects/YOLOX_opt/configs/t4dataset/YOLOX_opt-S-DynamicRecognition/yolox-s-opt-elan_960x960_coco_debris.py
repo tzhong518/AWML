@@ -1,7 +1,7 @@
 _base_ = [
-    "../../../../autoware_ml/configs/detection2d/default_runtime.py",
-    "../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
-    "../../../../autoware_ml/configs/detection2d/dataset/t4dataset/yolox.py"
+    "../../../../../autoware_ml/configs/detection2d/default_runtime.py",
+    "../../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
+    "../../../../../autoware_ml/configs/detection2d/dataset/t4dataset/t4dataset_DynamicRecognition.py"
 ]
 
 custom_imports = dict(

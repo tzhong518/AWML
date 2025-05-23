@@ -1,6 +1,6 @@
 _base_ = [
-    "../../../../autoware_ml/configs/detection2d/default_runtime.py",
-    "../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
+    "../../../../../autoware_ml/configs/detection2d/default_runtime.py",
+    "../../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
 ]
 
 custom_imports = dict(

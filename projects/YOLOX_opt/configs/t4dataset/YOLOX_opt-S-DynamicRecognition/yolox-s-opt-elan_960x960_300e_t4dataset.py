@@ -1,7 +1,7 @@
 _base_ = [
-    "../../../../autoware_ml/configs/detection2d/default_runtime.py",
-    "../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
-    "../../../../autoware_ml/configs/detection2d/dataset/t4dataset/yolox.py",
+    "../../../../../autoware_ml/configs/detection2d/default_runtime.py",
+    "../../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
+    "../../../../../autoware_ml/configs/detection2d/dataset/t4dataset/t4dataset_DynamicRecognition.py",
 ]
 
 custom_imports = dict(
@@ -34,7 +34,6 @@ activation = "ReLU6"
 num_workers = 4
 
 base_lr = 0.001
-# num_classes = 8
 
 # model settings
 model = dict(
@@ -67,7 +66,7 @@ model = dict(
     ),
     bbox_head=dict(
         type="YOLOXHead",
-        num_classes=len(_base_.classes),
+        num_classes=8,
         in_channels=128,
         feat_channels=128,
         act_cfg=dict(type=activation),
@@ -152,29 +151,6 @@ test_pipeline = [
     ),
 ]
 
-# data = dict(
-#     samples_per_gpu=12,
-#     workers_per_gpu=12,
-#     persistent_workers=True,
-#     train=train_dataset,
-#     val=dict(
-#         type=DATASET_TYPE,
-#         data_root=DATA_ROOT,
-#         version="annotation",
-#         pipeline=test_pipeline,
-#         dataset_config=DATASET_CONFIG,
-#         split_type="val",
-#     ),
-#     test=dict(
-#         type=DATASET_TYPE,
-#         data_root=DATA_ROOT,
-#         version="annotation",
-#         pipeline=test_pipeline,
-#         dataset_config=DATASET_CONFIG,
-#         split_type="test",
-#     ),
-# )
-
 train_dataloader = dict(
     batch_size=batch_size,
     num_workers=num_workers,
@@ -192,7 +168,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=anno_file_root + "yolox_infos_train.json",
+        ann_file=anno_file_root + "yolox_infos_val.json",
         # Needs to be updated to tlr_infos_test.json once the dataset gets larger, and validation split is also added.
         # The splits were not modified so that we could compare them to previous models.
         test_mode=True,
@@ -210,7 +186,7 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=anno_file_root + "yolox_infos_train.json",
+        ann_file=anno_file_root + "yolox_infos_val.json",
         test_mode=True,
         pipeline=test_pipeline,
         backend_args=backend_args,
