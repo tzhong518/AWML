@@ -40,7 +40,8 @@ def create_yolox_checkpoint(autoware_ml_ckpt: str, work_dir: str):
     modified_tier4_ckpt_path = os.path.join(tmp_dir, "yolox_s_opt_modified.pth")
     modified_tier4_ckpt_path = os.path.abspath(modified_tier4_ckpt_path)
     if not os.path.isfile(tier4_ckpt_save_path):
-        request.urlretrieve(url, tier4_ckpt_save_path)
+        # request.urlretrieve(url, tier4_ckpt_save_path)
+        print("tier4 ckpt {} does not exist.".format(tier4_ckpt_save_path))
 
     tier4_ckpt = torch.load(tier4_ckpt_save_path)
 
