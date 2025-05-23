@@ -11,7 +11,6 @@ custom_imports = dict(
 
 # conv_yoloxで変換したumedaモデル
 load_from = "/workspace/tlr-yolox/autoware-ml/checkpoints/epoch_12_ckpt_mmdet.pth"
-#load_from = "/home/yamashita/work_hdd12tb//tlr-yolox/autoware-ml/mmdeploy/work-dirs/mmdet/mmdet-yolox-s-opt/end2end.onnx"
 
 img_scale = (960, 960)  # width, height
 class_name = (

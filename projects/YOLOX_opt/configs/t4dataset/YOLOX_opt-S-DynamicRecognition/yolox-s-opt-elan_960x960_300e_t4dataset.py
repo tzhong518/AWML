@@ -14,14 +14,7 @@ custom_imports = dict(
     allow_failed_imports=False,
 )
 
-# # dataset type setting
-# dataset_type = "T4Dataset"
-# info_train_file_name = "t4dataset_base_infos_train.pkl"
-# info_val_file_name = "t4dataset_base_infos_val.pkl"
-# info_test_file_name = "t4dataset_base_infos_test.pkl"
-
 IMG_SCALE = (960, 960)
-# IMG_SCALE = (1280, 960)
 
 # parameter settings
 img_scale = (960, 960)
@@ -76,11 +69,6 @@ model = dict(
     # 0.01, and the threshold of the test phase is 0.001.
     test_cfg=dict(score_thr=0.01, nms=dict(type="nms", iou_threshold=0.65)),
 )
-
-# dataset settings
-# DATA_ROOT = "data/t4dataset/x2/db_v2_0_v1_1_cleaned"
-# DATASET_TYPE = "T4Dataset"
-# DATASET_CONFIG = "config/dataset_config/2d_linking.yaml"
 
 data_root = ""
 anno_file_root = "./data/t4dataset/x2/db_v2_0_v1_1_cleaned/"
@@ -193,13 +181,6 @@ test_dataloader = dict(
     ),
 )
 
-# val_evaluator = [
-#     dict(type="VOCMetric", metric="mAP"),
-# ]
-
-# test_evaluator = val_evaluator
-
-
 val_evaluator = [
     dict(type="VOCMetric", metric="mAP"),
 ]
@@ -217,7 +198,6 @@ optimizer = dict(
     ),
     paramwise_cfg=dict(norm_decay_mult=0.0, bias_decay_mult=0.0),
 )
-# optimizer_config = dict(grad_clip=None)
 
 # learning rate
 if max_epochs > 5:
@@ -287,47 +267,3 @@ vis_backends = [
 visualizer = dict(
     type="DetLocalVisualizer", vis_backends=vis_backends, name="visualizer"
 )
-
-
-# max_epochs = 300
-# num_last_epochs = 15
-# resume_from = None
-# interval = 10
-
-# # learning policy
-# lr_config = dict(
-#     _delete_=True,
-#     policy="YOLOX",
-#     warmup="exp",
-#     by_epoch=False,
-#     warmup_by_epoch=True,
-#     warmup_ratio=1,
-#     warmup_iters=5,  # 5 epoch
-#     num_last_epochs=num_last_epochs,
-#     min_lr_ratio=0.05,
-# )
-
-# runner = dict(type="EpochBasedRunner", max_epochs=max_epochs)
-
-# custom_hooks = [
-#     dict(type="YOLOXModeSwitchHook", num_last_epochs=num_last_epochs, priority=48),
-#     dict(
-#         type="SyncNormHook",
-#         num_last_epochs=num_last_epochs,
-#         interval=interval,
-#         priority=48,
-#     ),
-#     dict(type="ExpMomentumEMAHook", resume_from=resume_from, momentum=0.0001, priority=49),
-# ]
-# checkpoint_config = dict(interval=interval)
-# evaluation = dict(
-#     save_best="auto",
-#     # The evaluation interval is 'interval' when running epoch is
-#     # less than ‘max_epochs - num_last_epochs’.
-#     # The evaluation interval is 1 when running epoch is greater than
-#     # or equal to ‘max_epochs - num_last_epochs’.
-#     interval=interval,
-#     dynamic_intervals=[(max_epochs - num_last_epochs, 1)],
-#     metric="bbox",
-# )
-# log_config = dict(interval=50)
