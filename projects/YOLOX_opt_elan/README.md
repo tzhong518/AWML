@@ -1,4 +1,4 @@
-# YOLOX_opt
+# YOLOX_opt_elan
 ## Summary
 
 - [Support priority](https://github.com/tier4/AWML/blob/main/docs/design/autoware_ml_design.md#support-priority): Tier A
@@ -35,7 +35,7 @@ python3 tools/detection2d/train.py /workspace/projects/YOLOX_opt_elan/configs/t4
 - For dynamic recognition
 
 ```bash
-python tools/detection2d/test.py projects/YOLOX_opt/configs/t4dataset/yolox-s-opt-elan_960x960_300e_t4dataset.py /workspace/work_dirs/yolox-s-opt-elan_960x960_300e_t4dataset/epoch_300.pth
+python tools/detection2d/test.py projects/YOLOX_opt_elan/configs/t4dataset/yolox-s-opt-elan_960x960_300e_t4dataset.py /workspace/work_dirs/yolox-s-opt-elan_960x960_300e_t4dataset/epoch_300.pth
 ```
 ### 4. Deploy
 
