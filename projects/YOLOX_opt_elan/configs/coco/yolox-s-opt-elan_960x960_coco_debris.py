@@ -5,8 +5,8 @@ _base_ = [
 ]
 
 custom_imports = dict(
-    imports=["projects.YOLOX_opt.yolox", "autoware_ml.detection2d.metrics",
-        "projects.YOLOX_opt.yolox.models", "projects.YOLOX_opt.yolox.datasets.t4_dataset"],
+    imports=["projects.YOLOX_opt_elan.yolox", "autoware_ml.detection2d.metrics",
+        "projects.YOLOX_opt_elan.yolox.models", "projects.YOLOX_opt_elan.yolox.datasets.t4_dataset"],
     allow_failed_imports=False)
 
 # conv_yoloxで変換したumedaモデル

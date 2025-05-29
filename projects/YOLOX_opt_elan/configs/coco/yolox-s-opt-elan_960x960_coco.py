@@ -5,10 +5,10 @@ _base_ = [
 ]
 
 custom_imports = dict(
-    imports=["projects.YOLOX_opt.yolox",
+    imports=["projects.YOLOX_opt_elan.yolox",
     "autoware_ml.detection2d.metrics",
     "autoware_ml.detection2d.datasets",
-    "projects.YOLOX_opt.yolox.models",
+    "projects.YOLOX_opt_elan.yolox.models",
     ],
     allow_failed_imports=False)
 
