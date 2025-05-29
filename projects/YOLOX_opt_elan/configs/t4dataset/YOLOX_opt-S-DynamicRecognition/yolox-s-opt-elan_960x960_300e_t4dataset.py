@@ -71,7 +71,8 @@ model = dict(
 )
 
 data_root = ""
-anno_file_root = "./data/t4dataset/x2/db_v2_0_v1_1_cleaned/"
+# anno_file_root = "./data/t4dataset/x2/db_v2_0_v1_1_cleaned/"
+anno_file_root = "./data/t4dataset/samrat/"
 dataset_type = "T4Dataset"
 
 backend_args = None
