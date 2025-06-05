@@ -42,7 +42,7 @@ python tools/detection2d/test.py projects/YOLOX_opt_elan/configs/t4dataset/yolox
 - For dynamic recognition
 
 ```bash
-python3 tools/detection2d/deploy_yolox_s_opt.py /workspace/work_dirs/yolox-s-opt-elan_960x960_300e_t4dataset/epoch_300.pth yolox-s+-opt-T4-960x960.py --batch_size 6 --output_onnx_file yolox_s_opt_elan_batch_6.onnx
+python projects/YOLOX_opt_elan/scripts/deploy_yolox_s_opt.py work_dirs/yolox-s-opt-elan_960x960_300e_t4dataset/epoch_300.pth projects/YOLOX_opt_elan/scripts/sample/yolox-s+-opt-T4-960x960.py --batch_size 6 --output_onnx_file yolox_s_opt_elan_batch_6.onnx
 ```
 
 ## Latency
