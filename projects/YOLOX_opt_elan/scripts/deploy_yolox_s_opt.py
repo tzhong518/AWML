@@ -1,11 +1,12 @@
 import argparse
 import os
-import sys
 import re
+import shutil
+import sys
 from collections import OrderedDict
 from subprocess import call
 from urllib import request
-import shutil
+
 import numpy as np
 import onnx
 import onnx_graphsurgeon as gs
@@ -13,8 +14,10 @@ import torch
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import yolox_s_opt_to_mmdet_key
-sys.path.append('.')
+
+sys.path.append(".")
 from tools.detection2d.deploy_yolox import add_efficientnms_trt
+
 
 def current_dir():
     return os.path.dirname(os.path.abspath(__file__))
