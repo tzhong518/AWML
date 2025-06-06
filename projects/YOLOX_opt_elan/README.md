@@ -15,7 +15,17 @@
 
 ## Results and models
 
-- YOLOX_opt-S-elan
+- YOLOX_opt-elan
+  - Compared to YOLOX_opt, this model is optimized for computation on Xavier GPU and Xavier DLA.
+    - On Xavier GPU, a model comparable to YOLO-l can be executed with an inference time of less than 10ms.
+    - On DLA, The optimized YOLOX-s model achieves a latency of 16 milliseconds.
+  - The main differences are as below:
+    - STEM is simplified since slice processing is slow on Xaiver GPU while not supported on DLA. 
+    - SPP is removed since pooling kernel size larger than 8 are not supported on DLA. ASPP can be used as a substitute.
+    - Activation function Swish is replaced with ReLU or ReLU6. ReLU6 is particularly useful during training for improving quantization robustness.
+    - Depth Scaling is increase by a factor of 2 as same as YOLOX-m.
+    - ELAN is utilized, as in YOLOv7 and YOLOv8.
+  
 
 ## Get started
 ### 1. Setup
