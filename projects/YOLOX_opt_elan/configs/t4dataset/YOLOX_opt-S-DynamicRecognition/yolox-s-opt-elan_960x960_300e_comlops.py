@@ -18,11 +18,11 @@ IMG_SCALE = (960, 960)
 
 # parameter settings
 img_scale = (960, 960)
-max_epochs = 300
+max_epochs = 150
 num_last_epochs = 15
 resume_from = None
-interval = 1
-batch_size = 1
+interval = 10
+batch_size = 64
 activation = "ReLU6"
 num_workers = 4
 
@@ -71,7 +71,7 @@ model = dict(
 )
 
 data_root = ""
-anno_file_root = "./data/t4dataset/comlops/"
+anno_file_root = "./data/comlops/"
 dataset_type = "T4Dataset"
 
 backend_args = None
