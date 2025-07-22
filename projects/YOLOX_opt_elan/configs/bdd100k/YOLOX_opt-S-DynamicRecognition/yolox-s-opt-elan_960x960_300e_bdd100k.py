@@ -19,7 +19,7 @@ max_epochs = 300
 num_last_epochs = 15
 resume_from = None
 interval = 1
-batch_size = 12
+batch_size = 32
 activation = "ReLU6"
 num_workers = 4
 
@@ -27,7 +27,7 @@ base_lr = 0.001
 num_classes = 10
 
 # dataset settings
-DATA_ROOT = "/dataset/bdd100k/"
+DATA_ROOT = "/workspace/data/yamashita/bdd100k/"
 DATASET_TYPE = "BDD100kDataset"
 
 backend_args = None

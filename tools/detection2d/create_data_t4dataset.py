@@ -181,6 +181,7 @@ def main() -> None:
                 attributes = {tmp.token: tmp.name for tmp in t4.attribute}
                 categories = {tmp.token: tmp.name for tmp in t4.category}
 
+                print("processing:", scene_id)
                 update_detection_data_annotations(
                     data_list,
                     t4.object_ann,

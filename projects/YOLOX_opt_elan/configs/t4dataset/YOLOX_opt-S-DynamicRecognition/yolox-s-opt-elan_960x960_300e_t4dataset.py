@@ -1,7 +1,7 @@
 _base_ = [
     "../../../../../autoware_ml/configs/detection2d/default_runtime.py",
     "../../../../../autoware_ml/configs/detection2d/schedules/schedule_1x.py",
-    "../../../../../autoware_ml/configs/detection2d/dataset/t4dataset/t4dataset_DynamicRecognition.py",
+    "../../../../../autoware_ml/configs/detection2d/dataset/t4dataset/t4dataset_dynamic_recognition.py",
 ]
 
 custom_imports = dict(
@@ -21,8 +21,9 @@ img_scale = (960, 960)
 max_epochs = 300
 num_last_epochs = 15
 resume_from = None
+load_from = "/workspace/pretrained/yolox-s-opt-elan_960x960_300e_comlops/epoch_150.pth"
 interval = 1
-batch_size = 4
+batch_size = 32
 activation = "ReLU6"
 num_workers = 4
 
@@ -71,8 +72,8 @@ model = dict(
 )
 
 data_root = ""
-# anno_file_root = "./data/t4dataset/x2/db_v2_0_v1_1_cleaned/"
-anno_file_root = "./data/t4dataset/samrat/"
+anno_file_root = "./data/taozhong/t4dataset/db_v2_0_v1_1_cleaned/"
+# anno_file_root = "./data/t4dataset/samrat/"
 dataset_type = "T4Dataset"
 
 backend_args = None
@@ -235,7 +236,9 @@ log_config = dict(
     hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")],
 )
 
-default_hooks = dict(checkpoint=dict(interval=interval, max_keep_ckpts=3))  # only keep latest 3 checkpoints
+default_hooks = dict(
+        checkpoint=dict(type='CheckpointHook', save_best='auto'))
+        #checkpoint=dict(interval=interval, max_keep_ckpts=3))  # only keep latest 3 checkpoints
 
 custom_hooks = [
     dict(type="YOLOXModeSwitchHook", num_last_epochs=num_last_epochs, priority=48),

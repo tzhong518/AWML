@@ -79,8 +79,8 @@ class_mappings = {
     "pedestrian.police_officer": "pedestrian",
     "pedestrian.stroller": "pedestrian",
     "pedestrian.wheelchair": "pedestrian",
-    # "static_object.bicycle rack": "bicycle rack",
-    # "static_object.bollard": "bollard",
+    "static_object.bicycle rack": "bicycle rack",
+    "static_object.bollard": "bollard",
     "vehicle.ambulance": "car",  # Define vehicle.ambulance as car since vehicle.emergency (ambulance & police) is defined as car
     "vehicle.bicycle": "bicycle",
     "vehicle.bus": "bus",
