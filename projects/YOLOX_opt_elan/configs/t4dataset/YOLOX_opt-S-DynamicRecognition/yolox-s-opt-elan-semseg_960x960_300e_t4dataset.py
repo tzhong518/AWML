@@ -22,9 +22,9 @@ IMG_SCALE = (960, 960)
 img_scale = (960, 960)
 max_epochs = 300
 num_last_epochs = 15
-resume_from = None
+resume_from = "/home/zhong/workspace/AWML/work_dirs/yolox-s-opt-elan-semseg_960x960_300e_t4dataset/best_seg_mIoU_iter_5000.pth"
 interval = 1
-batch_size = 2
+batch_size = 12
 activation = "ReLU6"
 num_workers = 4
 
@@ -65,6 +65,10 @@ model = dict(
         in_channels=128,
         feat_channels=128,
         act_cfg=dict(type=activation),
+        loss_cls=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.0), # 【关键】设为 0
+        loss_bbox=dict(type='IoULoss', loss_weight=0.0), # 【关键】设为 0
+        loss_obj=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.0), # 【关键】设为 0
+        loss_l1=dict(type='L1Loss', loss_weight=0.0),    # 【关键】设为 0
     ),
     # 新增 mask head
     mask_head=dict(
@@ -80,7 +84,7 @@ model = dict(
 )
 
 data_root = ""
-anno_file_root = "./data/comlops_mini_seg/"
+anno_file_root = "./data/comlops/semseg/"
 dataset_type = "T4Dataset"
 
 backend_args = None
@@ -202,7 +206,7 @@ train_dataset = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=anno_file_root + "comlops_mini_seg_infos_train.json",
+        ann_file=anno_file_root + "comlops_infos_train_cleaned.json",
         pipeline=[
             dict(type="LoadImageFromFile", backend_args=backend_args),
             dict(type="LoadAnnotations", with_bbox=True, with_seg=True),
@@ -250,11 +254,12 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=anno_file_root + "comlops_mini_seg_infos_train.json",
+        ann_file=anno_file_root + "comlops_infos_val_cleaned.json",
         test_mode=True,
         pipeline=test_pipeline,
         backend_args=backend_args,
         metainfo=metainfo,
+        indices=2000, 
     ),
 )
 
@@ -268,9 +273,16 @@ val_evaluator = [
     # 注意：这里 type 最好加上 mmseg. 前缀以防万一
     dict(type='mmseg.IoUMetric', ignore_index=255, iou_metrics=['mIoU'], prefix="seg")
 ]
+
 test_evaluator = val_evaluator
 
-train_cfg = dict(max_epochs=max_epochs, val_interval=interval)
+# train_cfg = dict(max_epochs=max_epochs, val_interval=interval)
+train_cfg = dict(
+    _delete_=True,
+    type='IterBasedTrainLoop',
+    max_iters=500000,      # 计算公式: 10000张 / 8 batch_size = 1250
+    val_interval=100    # 建议设置为 max_iters，即训练完这10000张后再验证
+)
 
 # optimizer
 optimizer = dict(
@@ -315,12 +327,34 @@ log_config = dict(
     hooks=[dict(type="TextLoggerHook"), dict(type="TensorboardLoggerHook")],
 )
 
+# default_hooks = dict(
+#     checkpoint=dict(interval=interval, max_keep_ckpts=3),
+#     visualization=dict(
+#         type='DetVisualizationHook',
+#         draw=True,             # 【关键】必须设为 True，否则只记录日志不画图
+#         interval=50,            # 验证/测试时，每隔多少个样本画一张（设为 1 则每张都画，设为 50 则抽样画）
+#         show=False,            # 服务器端设为 False
+#         wait_time=2,
+#         test_out_dir='vis_data' # (可选) 也会把图片保存在本地这个文件夹下
+#     ),
+# )
 default_hooks = dict(
-    checkpoint=dict(interval=interval, max_keep_ckpts=3),
+    checkpoint=dict(
+        type='CheckpointHook', 
+        interval=100,   # 训练结束时保存模型
+        by_epoch=False,  # 必须设为 False
+        max_keep_ckpts=5, 
+        save_best='seg/mIoU',
+        rule='greater'
+    ),
+    logger=dict(
+        type='LoggerHook', 
+        interval=50      # 每 50 次迭代打印一次日志
+    ),
     visualization=dict(
         type='DetVisualizationHook',
         draw=True,             # 【关键】必须设为 True，否则只记录日志不画图
-        interval=50,            # 验证/测试时，每隔多少个样本画一张（设为 1 则每张都画，设为 50 则抽样画）
+        interval=100,            # 验证/测试时，每隔多少个样本画一张（设为 1 则每张都画，设为 50 则抽样画）
         show=False,            # 服务器端设为 False
         wait_time=2,
         test_out_dir='vis_data' # (可选) 也会把图片保存在本地这个文件夹下
@@ -351,5 +385,6 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[dict(type='LocalVisBackend'), dict(type='TensorboardVisBackend')],
     name='visualizer',
-    alpha=0.5,  # 设置透明度，方便看清 mask 下的原图
+    # alpha=0.5,  # 设置透明度，方便看清 mask 下的原图
+    alpha=1.0,
 )

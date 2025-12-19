@@ -98,6 +98,8 @@ def update_detection_data_annotations(
 
     # Instance (Objects) 
     for ann in object_ann:
+        if ann.sample_data_token not in data_list:
+            continue
         class_name = class_mappings.get(categories[ann.category_token], None)
         if class_name not in allowed_classes:
             continue
@@ -157,14 +159,13 @@ def update_detection_data_annotations(
         colormap = generate_colormap(len(allowed_classes) + 1)
         for key, entry in data_list.items():
             gray_mask = convert_entry_instances_to_semantic(entry, allowed_classes)
-
-            mask_file = f"{root_path}/masks/{(entry.img_path).split('/')[-5] +'_' + (entry.img_path).split('/')[-2] +'_' + (entry.img_path).split('/')[-1]}.png"
+            mask_file = f"{root_path}/semseg/masks/{(entry.img_path).split('/')[-4] +'_' + (entry.img_path).split('/')[-2] +'_' + (entry.img_path).split('/')[-1]}".replace('.jpg', '.png')
             os.makedirs(os.path.dirname(mask_file), exist_ok=True)
             cv2.imwrite(mask_file, gray_mask.astype(np.uint8))
             entry.gt_semantic_seg = mask_file
 
             if save_colored_masks:
-                color_file = f"{root_path}/masks_color/{(entry.img_path).split('/')[-5] +'_' +(entry.img_path).split('/')[-2] +'_' + (entry.img_path).split('/')[-1]}.png"
+                color_file = f"{root_path}/semseg/masks_color/{(entry.img_path).split('/')[-5] +'_' +(entry.img_path).split('/')[-2] +'_' + (entry.img_path).split('/')[-1]}".replace('.jpg', '.png')
                 save_colored_mask(gray_mask, color_file, colormap)
 
 def get_scene_root_dir_path(
@@ -301,6 +302,7 @@ def main() -> None:
                 t4 = Tier4(
                     data_root=scene_root_dir_path,
                     verbose=False,
+                    version="annotation",
                 )
 
                 data_list: Dict[str, DataEntry] = {}
