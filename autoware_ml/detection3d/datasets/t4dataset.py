@@ -120,6 +120,23 @@ class T4Dataset(NuScenesDataset):
                 - gt_labels_3d (np.ndarray): Labels of ground truths.
         """
         ann_info = super().parse_ann_info(info=info)
+        if info.get("instances") and "visibility_level" not in ann_info:
+            instances = info["instances"]
+            visibility_token = np.asarray([instance.get("visibility_token", "") for instance in instances])
+            visibility_level = np.asarray([instance.get("visibility_level", "") for instance in instances])
+            if self.use_valid_flag:
+                filter_mask = np.asarray([instance["bbox_3d_isvalid"] for instance in instances], dtype=bool)
+            else:
+                filter_mask = np.asarray(
+                    [
+                        (instance.get("num_lidar_pts", 0) > 0)
+                        and (instance.get("bbox_label_3d", -1) > -1)
+                        for instance in instances
+                    ],
+                    dtype=bool,
+                )
+            ann_info["visibility_token"] = visibility_token[filter_mask]
+            ann_info["visibility_level"] = visibility_level[filter_mask]
         for label in ann_info["gt_labels_3d"]:
             self.valid_class_name_ins[self.class_names[label]] += 1
         return ann_info

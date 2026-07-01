@@ -3,7 +3,12 @@ from .core.bbox.coders import NMSFreeCoder
 from .core.bbox.match_costs import BBox3DL1CostAssigner, BBoxL1CostAssigner, FocalLossCostAssigner, IoUCostAssigner
 from .datasets.pipelines.dataset import StreamPETRDataset
 from .datasets.pipelines.formating import PETRFormatBundle3D
-from .datasets.pipelines.loading import Filter3DBoxesinBlindSpot, StreamPETRLoadAnnotations2D
+from .datasets.pipelines.loading import (
+    Filter3DBoxesByVisibilityLevel,
+    Filter3DBoxesByVisibilityToken,
+    Filter3DBoxesinBlindSpot,
+    StreamPETRLoadAnnotations2D,
+)
 from .datasets.pipelines.nuscenes import StreamPETRNuScenesDataset
 from .datasets.pipelines.transform_3d import (
     ConvertTo3dGlobal,
@@ -39,6 +44,8 @@ __all__ = [
     "PETRFormatBundle3D",
     "StreamPETRLoadAnnotations2D",
     "Filter3DBoxesinBlindSpot",
+    "Filter3DBoxesByVisibilityLevel",
+    "Filter3DBoxesByVisibilityToken",
     "StreamPETRDataset",
     "NoCacheAmpOptimWrapper",
     "DebugOptimWrapper",

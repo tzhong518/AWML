@@ -473,6 +473,7 @@ def get_instances(
     annotations: list[SampleAnnotation],
     valid_flag: NDArray,
     gt_attrs: list[list[str]],
+    visibility_levels: list[str],
     filter_attributions: Optional[List[Tuple[str, str]]],
     matched_object_idx=None,
     merge_type="extend_longer",
@@ -500,6 +501,7 @@ def get_instances(
                 new_num_lidar_pts = annotations[idx1].num_lidar_pts + annotations[idx2].num_lidar_pts
                 new_num_radar_pts = annotations[idx1].num_radar_pts + annotations[idx2].num_radar_pts
                 new_attrs = list(set(gt_attrs[idx1] + gt_attrs[idx2]))
+                new_visibility_level = "none" if "none" in (visibility_levels[idx1], visibility_levels[idx2]) else visibility_levels[idx1]
                 empty_instance = get_empty_instance()
 
                 if target_object in class_names:
@@ -521,6 +523,7 @@ def get_instances(
                 empty_instance["velocity"] = new_velocity.tolist()
                 empty_instance["num_lidar_pts"] = new_num_lidar_pts
                 empty_instance["num_radar_pts"] = new_num_radar_pts
+                empty_instance["visibility_level"] = new_visibility_level
                 empty_instance["bbox_3d_isvalid"] = valid_flag[idx1] and valid_flag[idx2]
                 empty_instance["gt_nusc_name"] = target_object
                 empty_instance["gt_attrs"] = new_attrs
@@ -555,8 +558,11 @@ def get_instances(
         empty_instance["bbox_label_3d"] = copy.deepcopy(empty_instance["bbox_label"])
 
         empty_instance["velocity"] = velocity[i].tolist()
+        empty_instance["annotation_token"] = annotations[i].token
         empty_instance["num_lidar_pts"] = annotations[i].num_lidar_pts
         empty_instance["num_radar_pts"] = annotations[i].num_radar_pts
+        empty_instance["visibility_token"] = getattr(annotations[i], "visibility_token", None)
+        empty_instance["visibility_level"] = visibility_levels[i]
         empty_instance["bbox_3d_isvalid"] = valid_flag[i]
         empty_instance["gt_nusc_name"] = boxes[i].semantic_label.name
         empty_instance["gt_attrs"] = gt_attrs[i]
@@ -593,6 +599,7 @@ def get_annotations(
     assert len(gt_boxes) == len(annotations), f"{len(gt_boxes)}, {len(annotations)}"
 
     gt_attrs = get_gt_attrs(t4, annotations)
+    visibility_levels = [t4.get("visibility", ann.visibility_token).level.value for ann in annotations]
     assert len(names) == len(gt_attrs), f"{len(names)}, {len(gt_attrs)}"
     assert len(gt_boxes) == len(instance_tokens)
     assert velocity.shape == (len(gt_boxes), 2)
@@ -610,6 +617,7 @@ def get_annotations(
         annotations,
         valid_flag,
         gt_attrs,
+        visibility_levels,
         filter_attributions=cfg.filter_attributes,
         matched_object_idx=matched_object_idx,
         merge_type=cfg.merge_type,

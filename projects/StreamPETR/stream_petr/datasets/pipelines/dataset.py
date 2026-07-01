@@ -143,7 +143,7 @@ class StreamPETRDataset(T4Dataset):
                 [
                     x in info["images"]
                     and info["images"][x]["img_path"]
-                    and os.path.exists(info["images"][x]["img_path"])
+                    # and os.path.exists(info["images"][x]["img_path"])
                     for x in self.camera_order
                 ]
             ):
