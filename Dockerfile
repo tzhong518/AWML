@@ -38,7 +38,15 @@ RUN python3 -m pip --no-cache-dir install \
     nvidia-pyindex \
     openmim \
     nltk==3.8.1 \
-    mlflow==3.4.0
+    mlflow==3.4.0 \
+    fvcore
+
+# For T4, compile only sm75. For A100 use 80, H100 use 90, etc.
+ENV FLASH_ATTN_CUDA_ARCHS="75" 
+
+RUN MAX_JOBS=4 python3 -m pip install --no-cache-dir \
+    flash-attn \
+    --no-build-isolation
 
 # Install mim components
 RUN mim install \
