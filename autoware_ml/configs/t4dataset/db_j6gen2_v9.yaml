@@ -1,0 +1,30 @@
+# Please refer to db_j6gen2_v1.yaml for vehicle and sensor details.
+
+version: 1
+dataset_name: db-j6gen2-v9.0
+product: X2 Gen2 (dnjXqf91)
+vehicle: MJ20-008
+location: 
+  - Omika 
+annotation_hz: 1
+amount: 
+  - total: TBD 
+
+# T4 Dataset id/dataset version/location/vehicle_type
+train:
+  - 454e4e03-2efb-4973-be65-242822b8728b/0/Omika/J6_x2_Gen2/true
+  - a8544aff-8926-45f5-8c43-8a79d69e5ce2/0/Omika/J6_x2_Gen2/true
+  - 417a2b84-e3f4-4d1c-acc1-aaf0568188d8/0/Omika/J6_x2_Gen2/true
+  - 0599e44a-1aab-4ac8-a848-453e4f0505d0/0/Omika/J6_x2_Gen2/true
+  - 4658d370-99ce-4034-a5cc-978adf84d9b3/0/Omika/J6_x2_Gen2/true
+  - 876d1fe2-6331-4f21-addb-7e241e85ba9c/0/Omika/J6_x2_Gen2/true
+  - f4a0edc6-fcb7-4edb-b3bf-fef667f8f1c6/0/Omika/J6_x2_Gen2/true
+  - 7b1cd809-45ef-4dc3-b2d0-6516eac0758f/0/Omika/J6_x2_Gen2/true
+  - 1dc0a012-5377-48b7-bc0a-bba6d7c69f4c/0/Omika/J6_x2_Gen2/true
+  - 7222805c-d6ed-4406-b880-e95c065149d4/0/Omika/J6_x2_Gen2/true
+  - f880e30e-5849-46ab-a436-1e17d8465d54/0/Omika/J6_x2_Gen2/true
+  - 32c1e927-18c3-4771-aa74-3f7f60430dd6/0/Omika/J6_x2_Gen2/true
+  - 5a7d0463-9aac-41e8-b797-1b4382c5314a/0/Omika/J6_x2_Gen2/true
+  - 38ab17b7-a45e-4f7c-9522-4a0efe7c976d/0/Omika/J6_x2_Gen2/true
+  - 6f11e5bf-915f-488f-8cab-c773dca3431a/0/Omika/J6_x2_Gen2/true
+  - 1a9b5cb6-c839-4247-b4ac-4719963a4881/0/Omika/J6_x2_Gen2/true

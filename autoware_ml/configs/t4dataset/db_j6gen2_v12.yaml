@@ -1,0 +1,29 @@
+# Please refer to db_j6gen2_v1.yaml for vehicle and sensor details.
+
+version: 1
+dataset_name: db-j6gen2-v12.0
+product: X2 Gen2 (rAwaNfK1)
+vehicle: J6 Gen2 #3
+location: 
+  - Kawasaki
+annotation_hz: 1
+amount: 
+  - total: TBD 
+
+train:
+  - 95084e39-56a2-4b19-8093-36d145dd96ed/1/Kawasaki/J6_x2_Gen2/true
+  - 9020f9c7-216e-4303-8df4-48116e312825/1/Kawasaki/J6_x2_Gen2/true
+  - 6faf0437-d211-4770-a184-069e4b8b45e6/1/Kawasaki/J6_x2_Gen2/true
+  - 640d280b-8551-46a9-ba04-e136e32487d4/1/Kawasaki/J6_x2_Gen2/true
+  - d2b1e430-0188-4e6f-b281-0785822410bd/1/Kawasaki/J6_x2_Gen2/true
+  - fd787b32-a0cd-4a94-8d1f-1d04b3aadefe/1/Kawasaki/J6_x2_Gen2/true
+  - a4b3d1bb-935f-4c76-bc2d-39cdb3857e43/1/Kawasaki/J6_x2_Gen2/true
+  - 5821dd7a-1d88-41ba-92da-2a3a7dc71e0f/1/Kawasaki/J6_x2_Gen2/true
+  - 4a14cdf9-74ea-4532-9ff9-934f751d66a7/1/Kawasaki/J6_x2_Gen2/true
+  - 610e6b9f-0f8d-4f44-afcd-bed7e10b8bc5/1/Kawasaki/J6_x2_Gen2/true
+  - d2fd54c8-5718-46b8-a7ed-ce90a5298239/1/Kawasaki/J6_x2_Gen2/true
+  - 0286affd-1a93-492d-ae13-16390f7dc97c/1/Kawasaki/J6_x2_Gen2/true
+  - aeefd618-2d6b-4205-af50-7420a211cdf4/1/Kawasaki/J6_x2_Gen2/true
+  - f547b2d7-f42d-4c1b-a564-18ab00789ba1/1/Kawasaki/J6_x2_Gen2/true
+  - a7a1aa5e-18cb-4dc5-bb75-3ba08965075d/1/Kawasaki/J6_x2_Gen2/true
+  - 3441b82d-ae54-4712-83d4-7ffb4fd06611/1/Kawasaki/J6_x2_Gen2/true

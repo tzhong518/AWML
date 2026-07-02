@@ -1,0 +1,22 @@
+# Please refer to db_j6gen2_v1.yaml for vehicle and sensor details.
+
+version: 1
+dataset_name: db-j6gen2-v10.0
+product: X2 Gen2 (NTT East-Z9dPGx7Q)
+vehicle: MJ20-008
+location: 
+  - Komae
+annotation_hz: 1
+amount: 
+  - total: TBD 
+
+train:
+  - dca02324-e58d-43ed-a9ac-0a9419fb5d26/0/Komae/J6_x2_Gen2/true
+  - 0c77c12a-189d-4003-a328-709ed34ba6b8/0/Komae/J6_x2_Gen2/true
+  - 42d38222-5c5a-4ece-9625-5fb3314fb3cc/0/Komae/J6_x2_Gen2/true
+  - f1e46e52-0812-4e95-9b28-8a3b706a0dbe/0/Komae/J6_x2_Gen2/true
+  - aa5b71c3-7035-4b2b-a235-587cd424cb68/0/Komae/J6_x2_Gen2/true
+  - 8a94ba11-a7e8-47b7-8a73-fd6f6ac2b04c/0/Komae/J6_x2_Gen2/true
+
+val: []
+test: []

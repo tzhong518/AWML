@@ -1,0 +1,29 @@
+# Please refer to db_j6gen2_v1.yaml for vehicle and sensor details.
+
+version: 1
+dataset_name: db-j6gen2-v11.0
+product: X2 Gen2 (L3Lm25QG)
+vehicle: J6 Gen2 #3
+location: 
+  - Fukuyama
+annotation_hz: 1
+amount: 
+  - total: TBD 
+
+train:
+  - 5bb0d969-d800-488e-8afc-34a682b88bd1/1/Fukuyama/J6_x2_Gen2/true
+  - 415ecbec-e293-4cb8-9684-222f04c5a697/1/Fukuyama/J6_x2_Gen2/true
+  - a912a8bf-96c1-43db-a3db-782be60fd548/1/Fukuyama/J6_x2_Gen2/true
+  - 9ddbfc66-80b6-4a70-93dd-04a38a1d36a6/1/Fukuyama/J6_x2_Gen2/true
+  - 3c11fea2-0870-4f6c-b04a-d0109ae9e0af/1/Fukuyama/J6_x2_Gen2/true
+  - 442aa108-70db-4ca7-af74-c61a47f29204/1/Fukuyama/J6_x2_Gen2/true
+  - f6d15d93-3e46-4ae7-9c8b-11b939f8fdaa/1/Fukuyama/J6_x2_Gen2/true
+  - e75a9738-d355-44c5-8f8a-c6dbaf24e90c/1/Fukuyama/J6_x2_Gen2/true
+  - 59e36387-2672-4752-9231-26b2415adabd/1/Fukuyama/J6_x2_Gen2/true
+  - 49ac887f-1727-489e-97e5-6cd786c6b95f/0/Fukuyama/J6_x2_Gen2/true
+  - a9634bce-8742-440d-b8b8-fb2dc593ce47/0/Fukuyama/J6_x2_Gen2/true
+  - e4f07f91-d40f-40fd-af73-1dc403076d9f/0/Fukuyama/J6_x2_Gen2/true
+  - 57efeac7-9623-480d-9493-c0451d7d8f9f/0/Fukuyama/J6_x2_Gen2/true
+  - b53cbc0e-7426-46aa-9f3a-330999764b1d/0/Fukuyama/J6_x2_Gen2/true
+  - 69837ec6-51da-4ba9-ae72-3ea94c895727/0/Fukuyama/J6_x2_Gen2/true
+  - c4fd874e-e35a-456c-a0d1-a8361879ad85/0/Fukuyama/J6_x2_Gen2/true
