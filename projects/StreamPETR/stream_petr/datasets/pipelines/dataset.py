@@ -59,6 +59,7 @@ class StreamPETRDataset(T4Dataset):
         queue_length=8,
         random_length=0,
         camera_order=["CAM_FRONT", "CAM_BACK", "CAM_FRONT_LEFT", "CAM_BACK_LEFT", "CAM_FRONT_RIGHT", "CAM_BACK_RIGHT"],
+        camera_orders=None,
         metainfo={},
         filter_empty_gt=False,
         reset_origin=False,
@@ -67,9 +68,11 @@ class StreamPETRDataset(T4Dataset):
         *args,
         **kwargs,
     ):
-        assert anchor_camera in camera_order, f"Anchor camera {anchor_camera} not in camera order {camera_order}"
+        if camera_orders is None:
+            assert anchor_camera in camera_order, f"Anchor camera {anchor_camera} not in camera order {camera_order}"
         self.reset_origin = reset_origin
         self.camera_order = camera_order
+        self.camera_orders = camera_orders
         self.anchor_camera = anchor_camera
         super().__init__(metainfo=metainfo, filter_empty_gt=filter_empty_gt, *args, **kwargs)
         assert seq_mode, "Only supported seq_mode training at the moment"
@@ -85,10 +88,34 @@ class StreamPETRDataset(T4Dataset):
             self.random_length = 0
             self._set_group_indices()
         self.shuffle_cameras = shuffle_cameras
+        self._debug_printed_camera_order = False
 
         if self.reset_origin:
             print(f"Reset origin: {self.reset_origin}")
-        print(f"Camera corder: {self.camera_order} test_mode: {self.test_mode}")
+        print(f"Camera corder: {self.camera_order} camera orders: {self.camera_orders} test_mode: {self.test_mode}")
+
+    def _get_camera_order(self, info):
+        if self.camera_orders is None:
+            return self.camera_order.copy()
+
+        vehicle_type = info.get("vehicle_type", None)
+        if vehicle_type is not None:
+            camera_order = self.camera_orders.get(vehicle_type, None)
+            if camera_order is None:
+                raise KeyError(f"Missing camera order for vehicle type '{vehicle_type}' in camera_orders.")
+            return camera_order.copy()
+
+        for camera_order in self.camera_orders.values():
+            if all(x in info["images"] and info["images"][x]["img_path"] for x in camera_order):
+                return camera_order.copy()
+
+        raise KeyError("Missing 'vehicle_type' in entry and no camera_orders entry matches available images.")
+
+    def _get_anchor_camera(self, info):
+        camera_order = self._get_camera_order(info)
+        if self.anchor_camera in camera_order:
+            return self.anchor_camera
+        return camera_order[0]
 
     def _set_group_indices(self):
         res = []
@@ -132,8 +159,10 @@ class StreamPETRDataset(T4Dataset):
                     self.origin[idx] = current_origin
         self.sequence_start_time = []
         for idx, value in enumerate(self.flag):
+            info = self.get_data_info(idx)
+            anchor_camera = self._get_anchor_camera(info)
             if idx == 0 or value != self.flag[idx - 1]:
-                self.sequence_start_time.append(self.get_data_info(idx)["images"][self.anchor_camera]["timestamp"])
+                self.sequence_start_time.append(info["images"][anchor_camera]["timestamp"])
             else:
                 self.sequence_start_time.append(self.sequence_start_time[-1])
 
@@ -144,7 +173,7 @@ class StreamPETRDataset(T4Dataset):
                     x in info["images"]
                     and info["images"][x]["img_path"]
                     # and os.path.exists(info["images"][x]["img_path"])
-                    for x in self.camera_order
+                    for x in self._get_camera_order(info)
                 ]
             ):
                 return False
@@ -155,7 +184,9 @@ class StreamPETRDataset(T4Dataset):
 
         filtered = [info for info in self.data_list if validate_entry(info)]
 
-        sort_items = [(info["scene_token"], info["images"][self.anchor_camera]["timestamp"]) for info in filtered]
+        sort_items = [
+            (info["scene_token"], info["images"][self._get_anchor_camera(info)]["timestamp"]) for info in filtered
+        ]
         argsorted_indices = sorted(list(range(len(sort_items))), key=lambda i: sort_items[i])
 
         if len(filtered) != len(self.data_list):
@@ -249,7 +280,7 @@ class StreamPETRDataset(T4Dataset):
             next_idx=info.get("next", None),
             scene_token=info["scene_token"],
             frame_idx=info["token"],
-            timestamp=info["images"][self.anchor_camera]["timestamp"] - self.sequence_start_time[index],
+            timestamp=info["images"][self._get_anchor_camera(info)]["timestamp"] - self.sequence_start_time[index],
             l2e_matrix=l2e_matrix,
             e2g_matrix=e2g_matrix,
         )
@@ -261,11 +292,16 @@ class StreamPETRDataset(T4Dataset):
             extrinsics = []
             img_timestamp = []
 
-            camera_order = self.camera_order.copy()
+            camera_order = self._get_camera_order(info)
             if self.shuffle_cameras and not self.test_mode:
                 random.shuffle(camera_order)
 
             info["images"] = {x: info["images"][x] for x in camera_order}
+
+            if not self._debug_printed_camera_order and str(info.get("vehicle_type", "")).startswith("JPNTaxi"):
+                print("[StreamPETRDataset] JPNTaxi camera_order:", camera_order)
+                print("[StreamPETRDataset] JPNTaxi image paths:", [info["images"][x]["img_path"] for x in camera_order])
+                self._debug_printed_camera_order = True
 
             for cam_type in info["images"]:
                 cam_info = info["images"][cam_type]

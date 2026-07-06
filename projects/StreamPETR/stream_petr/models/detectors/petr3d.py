@@ -336,6 +336,12 @@ class Petr3D(MVXTwoStageDetector):
             return val[0]
         return val
 
+    @staticmethod
+    def _unwrap_singleton_sequence(val):
+        while isinstance(val, (list, tuple)) and len(val) == 1:
+            val = val[0]
+        return val
+
     def _extras_for_t4metric(self, img_meta: dict, data: dict) -> dict:
         """Build metainfo keys required by T4Metric (timestamp, lidar_path, eval_ann_info)."""
         out = {}
@@ -354,9 +360,13 @@ class Petr3D(MVXTwoStageDetector):
         g3d = data.get("gt_bboxes_3d")
         g3l = data.get("gt_labels_3d")
         if g3d is not None and len(g3d) > 0:
-            eval_ann["gt_bboxes_3d"] = g3d[0]
+            gt_bboxes_3d = self._unwrap_singleton_sequence(g3d[0])
+            if type(gt_bboxes_3d) is LiDARInstance3DBoxes:
+                eval_ann["gt_bboxes_3d"] = gt_bboxes_3d.to("cpu")
+            else:
+                eval_ann["gt_bboxes_3d"] = LiDARInstance3DBoxes(gt_bboxes_3d.tensor.detach().cpu(), box_dim=9)
         if g3l is not None and len(g3l) > 0:
-            labels = g3l[0]
+            labels = self._unwrap_singleton_sequence(g3l[0])
             # Val/test may carry CUDA tensors, Tensor subclasses, or list/tuple of tensors.
             if torch.is_tensor(labels):
                 eval_ann["gt_labels_3d"] = labels.detach().cpu().numpy()
