@@ -29,6 +29,9 @@ dataset_version_list = [
     "db_j6gen2_v7",
     "db_j6gen2_v8",
     "db_j6gen2_v9",
+    "db_j6gen2_v10",
+    "db_j6gen2_v11",
+    "db_j6gen2_v12",
     "db_largebus_v1",
     "db_largebus_v2",
     "db_largebus_v3",
@@ -56,20 +59,30 @@ dataset_test_groups = {
 data_prefix = dict(
     pts="",
     CAM_FRONT="",
+    CAM_FRONT_WIDE="",
     CAM_FRONT_LEFT="",
+    CAM_FRONT_LEFT_WIDE="",
     CAM_FRONT_RIGHT="",
+    CAM_FRONT_RIGHT_WIDE="",
     CAM_BACK="",
     CAM_BACK_RIGHT="",
+    CAM_BACK_RIGHT_WIDE="",
     CAM_BACK_LEFT="",
+    CAM_BACK_LEFT_WIDE="",
     sweeps="",
 )
 camera_types = {
     "CAM_FRONT",
+    "CAM_FRONT_WIDE",
     "CAM_FRONT_RIGHT",
+    "CAM_FRONT_RIGHT_WIDE",
     "CAM_FRONT_LEFT",
+    "CAM_FRONT_LEFT_WIDE",
     "CAM_BACK",
     "CAM_BACK_LEFT",
+    "CAM_BACK_LEFT_WIDE",
     "CAM_BACK_RIGHT",
+    "CAM_BACK_RIGHT_WIDE",
 }
 
 # class setting
@@ -146,6 +159,8 @@ name_mapping = {
     "traffic_cone": "traffic_cone",
     "trafficcone": "traffic_cone",
     "barrier": "barrier",
+    "other_vehicle": "car",
+    "other_pedestrian": "pedestrian",
 }
 
 class_names = ["car", "truck", "bus", "bicycle", "pedestrian", "traffic_cone", "barrier"]

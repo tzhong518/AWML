@@ -27,3 +27,56 @@ train:
   - b53cbc0e-7426-46aa-9f3a-330999764b1d/0/Fukuyama/J6_x2_Gen2/true
   - 69837ec6-51da-4ba9-ae72-3ea94c895727/0/Fukuyama/J6_x2_Gen2/true
   - c4fd874e-e35a-456c-a0d1-a8361879ad85/0/Fukuyama/J6_x2_Gen2/true
+  - dcf887b3-d38e-49eb-bf7d-f2f9b9553342/0/Fukuyama/J6_x2_Gen2/true
+  - 696d5cba-627c-4913-a9a1-73a8a062c8ae/0/Fukuyama/J6_x2_Gen2/true
+  - c4cbb440-e6f2-4717-9493-8ca6dd9604f6/0/Fukuyama/J6_x2_Gen2/true
+  - a7e1a0f7-edb5-4769-a2a3-b0285d961ca2/0/Fukuyama/J6_x2_Gen2/true
+  - 0af95143-109e-488f-8507-7c7ba9c360dd/0/Fukuyama/J6_x2_Gen2/true
+  - 773bd7d0-04d0-4dda-a63c-903404816416/0/Fukuyama/J6_x2_Gen2/true
+  - 6ba0fc3e-9481-4dd6-9111-856de304a437/0/Fukuyama/J6_x2_Gen2/true
+  - 7ba510dc-a1d5-43ec-b24a-292e74ef75d3/0/Fukuyama/J6_x2_Gen2/true
+  - d93ff406-5dfd-4a87-9974-30692f7093cf/0/Fukuyama/J6_x2_Gen2/true
+  - 32d06249-8367-4c50-adbe-ca902c6754b3/0/Fukuyama/J6_x2_Gen2/true
+  - 12bec89f-0ba1-43a4-8754-5888fd69e3d0/0/Fukuyama/J6_x2_Gen2/true
+  - 67fe8a6d-dada-4597-a429-f2b943ee3a9b/0/Fukuyama/J6_x2_Gen2/true
+  - 9a5c505f-d77f-4d74-9f0c-cf7549a83dd8/0/Fukuyama/J6_x2_Gen2/true
+  - 8a8497f9-9692-42f2-b46c-669b512d03bb/0/Fukuyama/J6_x2_Gen2/true
+  - 13a3842e-bde5-4673-89fc-52380a03d952/0/Fukuyama/J6_x2_Gen2/true
+  - 17e8ed8b-5fd2-409c-a7b8-75533cdc7bef/0/Fukuyama/J6_x2_Gen2/true
+  - 9fdd79ad-32ab-4ba6-a97e-830fed6e626a/0/Fukuyama/J6_x2_Gen2/true
+  - 34e17b72-0a69-4504-b148-5d5c518200fd/0/Fukuyama/J6_x2_Gen2/true
+  - 1aefa39a-67eb-4751-8c1f-b3d7a2be8889/0/Fukuyama/J6_x2_Gen2/true
+  - 1162836d-7e38-43e9-b4db-25e685031d7f/0/Fukuyama/J6_x2_Gen2/true
+  - 4cb15765-1e02-4d8b-aacd-3d547f3bf07e/0/Fukuyama/J6_x2_Gen2/true
+  - 0e3631e8-7fdb-406a-a33d-de476df554d8/0/Fukuyama/J6_x2_Gen2/true
+  - 9a041bb8-55a0-4a5c-940b-aacdc4cfbfbd/0/Fukuyama/J6_x2_Gen2/true
+  - a2d1e0a0-cde0-4dd4-9fcb-a3309ad02385/0/Fukuyama/J6_x2_Gen2/true
+  - 3e2a056c-85d9-41df-8913-1054108898bc/0/Fukuyama/J6_x2_Gen2/true
+  - fc87cef7-9dc0-40f5-8792-bd1fb77eb406/0/Fukuyama/J6_x2_Gen2/true
+  - a6ebe3cb-e98f-4f43-a7d7-49fc45d7f4be/0/Fukuyama/J6_x2_Gen2/true
+  - fc1b1da8-3308-4714-834f-60c6b23754ed/0/Fukuyama/J6_x2_Gen2/true
+  - 22eb26c9-4a6e-4e7d-be3d-16bf93412d23/0/Fukuyama/J6_x2_Gen2/true
+  - ba00630f-03b1-44da-a3c0-db70ef071b96/0/Fukuyama/J6_x2_Gen2/true
+  - 80cfb3ef-a5bd-4020-b21f-fac80127bd7b/0/Fukuyama/J6_x2_Gen2/true
+  - 22406c9b-33b8-4fe2-ac6c-4be2e6b9c464/0/Fukuyama/J6_x2_Gen2/true
+  - 364d9c94-3876-48dc-a247-5d6b3d02e45b/0/Fukuyama/J6_x2_Gen2/true
+  - 3b470d75-2a35-470c-ab0b-d31d962d02ff/0/Fukuyama/J6_x2_Gen2/true
+  - c7ca08ee-0098-4057-b7cf-f9ff02f348ab/0/Fukuyama/J6_x2_Gen2/true
+  - bb223f20-93e1-401d-a258-254e13bf8460/0/Fukuyama/J6_x2_Gen2/true
+
+val: 
+  - 8ce0fa8e-e359-4d39-b981-4951e76eaf7f/1/Fukuyama/J6_x2_Gen2/true
+  - 51ac1086-9c9c-45a9-8751-64fb41ce2050/1/Fukuyama/J6_x2_Gen2/true
+  - d8c78f47-4458-42a2-8eb0-ccc7074e8ce2/0/Fukuyama/J6_x2_Gen2/true
+  - 1334465e-855c-4882-bca7-e315dd98a6bf/0/Fukuyama/J6_x2_Gen2/true
+  - 13c67fd4-eaa1-40ea-9072-d0d9c34a2401/0/Fukuyama/J6_x2_Gen2/true
+
+test: 
+  - c2737316-5cb6-4292-905e-ea86e7a7e6b8/1/Fukuyama/J6_x2_Gen2/true
+  - 65c356f4-84c1-44d1-9f46-313d29ea5a98/1/Fukuyama/J6_x2_Gen2/true
+  - ba77e384-1072-4ac3-9ffb-183ba1bffeb2/0/Fukuyama/J6_x2_Gen2/true
+  - 44ceb8fc-65d2-4f04-931f-1e3f26a8a32c/0/Fukuyama/J6_x2_Gen2/true
+  - 1ff0ead3-efc9-4e49-a7ce-9a4861822562/0/Fukuyama/J6_x2_Gen2/true
+  - 807670b3-1c8d-490e-9251-d65860436e72/0/Fukuyama/J6_x2_Gen2/true
+  - 27fa5492-6365-4378-a2ec-950886479c8b/0/Fukuyama/J6_x2_Gen2/true
+  

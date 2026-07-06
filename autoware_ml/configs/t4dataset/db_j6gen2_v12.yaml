@@ -27,3 +27,21 @@ train:
   - f547b2d7-f42d-4c1b-a564-18ab00789ba1/1/Kawasaki/J6_x2_Gen2/true
   - a7a1aa5e-18cb-4dc5-bb75-3ba08965075d/1/Kawasaki/J6_x2_Gen2/true
   - 3441b82d-ae54-4712-83d4-7ffb4fd06611/1/Kawasaki/J6_x2_Gen2/true
+  - ae3cbd07-247c-4997-95a9-a6d7d3797111/1/Kawasaki/J6_x2_Gen2/true
+  - 4820657b-fb51-4b64-a790-414dc5f7193a/1/Kawasaki/J6_x2_Gen2/true
+  - cfc2afb5-a49e-4a22-bec9-26a529a5172d/1/Kawasaki/J6_x2_Gen2/true
+  - 1d095bce-c323-4d40-adce-8c9a3fb59226/1/Kawasaki/J6_x2_Gen2/true
+  - f0168cb0-bda3-4995-9d55-db725988df5b/1/Kawasaki/J6_x2_Gen2/true
+  - 3a0c82f1-57a8-4ad9-8c75-57227b73a67e/1/Kawasaki/J6_x2_Gen2/true
+  - 79ce9f59-6ae9-49bc-9199-fe77f91ecc0c/0/Kawasaki/J6_x2_Gen2/true
+
+val: 
+  - 9386837e-6547-489a-80d1-7aeae203d576/1/Kawasaki/J6_x2_Gen2/true
+  - 9ef020c8-522d-403a-a597-cbdf871c4965/1/Kawasaki/J6_x2_Gen2/true
+
+
+test: 
+  - 50f5df50-e343-4d53-8c5b-d94b21c74240/1/Kawasaki/J6_x2_Gen2/true
+  - ed48068b-8e0f-4051-aa9c-a5ef8fb2a891/1/Kawasaki/J6_x2_Gen2/true
+  - e86ea365-a96c-4a8f-9a1a-8f2b676db8e7/1/Kawasaki/J6_x2_Gen2/true
+  

@@ -7,6 +7,9 @@ input_modality = dict(use_lidar=True, use_camera=False)
 point_cloud_range = [-122.4, -122.4, -3.0, 122.4, 122.4, 5.0]
 voxel_size = [0.17, 0.17, 0.2]
 grid_size = [1440, 1440, 41]
+# Sparse dense output shapes
+sparse_dense_output_shapes = [180, 180, 2]
+
 eval_class_range = {
     "car": 120,
     "truck": 120,
@@ -63,6 +66,8 @@ train_pipeline = [
             "barrier",
         ],
     ),
+    dict(type="ObjectRangeMinPointsFilter", range_radius=[0, 60], min_num_points=3),
+    dict(type="ObjectRangeMinPointsFilter", range_radius=[60, 130], min_num_points=2),
     dict(type="PointShuffle"),
     dict(
         type="Pack3DDetInputs",
@@ -143,4 +148,4 @@ test_pipeline = [
 #   e.g., dict(filter_frames_with_missing_image=True).
 # - This is a LiDAR-only config (`input_modality['use_camera'] = False`), so
 #   image-based filtering does not apply and `filter_cfg` is intentionally None.
-filter_cfg = None
+filter_cfg = dict()
