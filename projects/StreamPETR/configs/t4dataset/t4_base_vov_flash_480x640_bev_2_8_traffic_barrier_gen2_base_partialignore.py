@@ -14,7 +14,7 @@ load_from = "pretrained/t4_base_vov_flash_480x640_bev_2_8_traffic_barrier_base/e
 
 # info_directory_path = "info/username/"
 # data_root = "data/t4dataset/"
-info_directory_path = "info/cameraonly/kokseang_2_8/"
+info_directory_path = "info/cameraonly/2_8/"
 data_root = "data/"
 
 data_prefix = _base_.data_prefix
@@ -26,7 +26,8 @@ num_epochs = 35
 val_interval = 5
 
 info_train_file_name="t4dataset_gen2_base_infos_train.pkl"
-info_val_file_name="t4dataset_gen2_base_infos_val.pkl"
+# info_val_file_name="t4dataset_gen2_base_infos_val.pkl"
+info_val_file_name="t4dataset_j6gen2_infos_test.pkl"
 info_test_file_name="t4dataset_gen2_base_infos_test.pkl"
 
 camera_orders = {
