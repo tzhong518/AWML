@@ -364,6 +364,80 @@ def _make_image_grid(images, pad=8):
 
 
 @TRANSFORMS.register_module()
+class LoadSparseDepthFromLiDAR(BaseTransform):
+    """Project the LiDAR point cloud onto every camera to build a sparse depth map.
+
+    Training-only auxiliary supervision. Must run AFTER ``ResizeCropFlipRotImage``
+    (so ``intrinsics``/``extrinsics`` already reflect the 2D image augmentation) and
+    BEFORE ``GlobalRotScaleTransImage`` (which virtually rotates/scales the LiDAR frame
+    via ``lidar2img @ R_inv`` while leaving the real image pixels and the point cloud
+    untouched). At this point camera-Z of each projected point is the true physical
+    depth of the corresponding image pixel, so the label aligns with what the network
+    actually sees. Also must run BEFORE ``PadMultiViewImage`` so the depth-map size is
+    derived from the unpadded image (480x640 -> 30x40 at stride 16).
+
+    Produces (per camera, at feature resolution H/stride x W/stride):
+        results["sparse_depth"]:      (N_cam, Hf, Wf) float32, camera-Z in meters (0 where empty)
+        results["sparse_depth_mask"]: (N_cam, Hf, Wf) float32, 1 where a point projected, else 0
+    When several points fall in the same feature cell, the nearest (min-Z) is kept.
+    """
+
+    def __init__(self, stride=16, load_dim=5, min_depth=0.1, max_depth=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stride = int(stride)
+        self.load_dim = int(load_dim)
+        self.min_depth = float(min_depth)
+        self.max_depth = None if max_depth is None else float(max_depth)
+
+    def _load_points(self, pts_filename):
+        if not os.path.exists(pts_filename):
+            raise FileNotFoundError(f"[LoadSparseDepthFromLiDAR] point cloud not found: {pts_filename}")
+        points = np.fromfile(pts_filename, dtype=np.float32)
+        points = points.reshape(-1, self.load_dim)[:, :3]
+        return points
+
+    def transform(self, results):
+        points = self._load_points(results["pts_filename"])
+        points_hom = np.hstack((points, np.ones((points.shape[0], 1), dtype=points.dtype)))
+
+        sparse_depth = []
+        sparse_depth_mask = []
+        for i in range(len(results["intrinsics"])):
+            lidar2cam = np.asarray(results["extrinsics"][i], dtype=np.float64)
+            cam2img = np.asarray(results["intrinsics"][i], dtype=np.float64)
+            H, W = _get_img_hw(results["img"][i].shape)
+            Hf, Wf = H // self.stride, W // self.stride
+
+            points_cam = (lidar2cam @ points_hom.T).T  # (M, 4)
+            z = points_cam[:, 2]
+            pixels = (cam2img[:3, :3] @ points_cam[:, :3].T).T  # (M, 3)
+            u = pixels[:, 0] / pixels[:, 2]
+            v = pixels[:, 1] / pixels[:, 2]
+
+            valid = z > self.min_depth
+            if self.max_depth is not None:
+                valid &= z < self.max_depth
+            valid &= (u >= 0) & (u < W) & (v >= 0) & (v < H)
+
+            depth_map = np.full(Hf * Wf, np.inf, dtype=np.float32)
+            if valid.any():
+                cell_u = np.clip((u[valid] / self.stride).astype(np.int64), 0, Wf - 1)
+                cell_v = np.clip((v[valid] / self.stride).astype(np.int64), 0, Hf - 1)
+                flat_idx = cell_v * Wf + cell_u
+                # keep nearest depth per cell
+                np.minimum.at(depth_map, flat_idx, z[valid].astype(np.float32))
+
+            mask = np.isfinite(depth_map)
+            depth_map[~mask] = 0.0
+            sparse_depth.append(depth_map.reshape(Hf, Wf))
+            sparse_depth_mask.append(mask.reshape(Hf, Wf).astype(np.float32))
+
+        results["sparse_depth"] = np.stack(sparse_depth).astype(np.float32)
+        results["sparse_depth_mask"] = np.stack(sparse_depth_mask).astype(np.float32)
+        return results
+
+
+@TRANSFORMS.register_module()
 class StreamPETRLoadAnnotations2D(BaseTransform):
 
     def transform(self, results):

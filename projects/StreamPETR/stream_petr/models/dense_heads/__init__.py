@@ -1,3 +1,4 @@
+from .aux_depth_head import AuxDepthHead
 from .focal_head import FocalHead
 from .petr_head_dn import PETRHeadDN
 from .sparse_head import SparseHead

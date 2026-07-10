@@ -61,6 +61,8 @@ class Petr3D(MVXTwoStageDetector):
         stride=16,
         position_level=0,
         aux_2d_only=True,
+        use_aux_depth=False,
+        aux_depth_head=None,
         **kwargs,
     ):
         super(Petr3D, self).__init__(
@@ -87,6 +89,13 @@ class Petr3D(MVXTwoStageDetector):
         self.position_level = position_level
         self.aux_2d_only = aux_2d_only
         self.test_flag = False
+        # Training-only auxiliary depth supervision head. Never used in
+        # forward_test / simple_test / deploy, so it does not affect inference.
+        self.use_aux_depth = use_aux_depth
+        if self.use_aux_depth and aux_depth_head is not None:
+            self.aux_depth_head = MODELS.build(aux_depth_head)
+        else:
+            self.aux_depth_head = None
 
     def extract_img_feat(self, img, len_queue=1):
         """Extract features of images."""
@@ -299,9 +308,28 @@ class Petr3D(MVXTwoStageDetector):
             data["img_feats"] = torch.cat([prev_img_feats, rec_img_feats], dim=1)
         else:
             data["img_feats"] = rec_img_feats
+
+        # Auxiliary depth supervision: computed only on the gradient (recent) frames,
+        # before `sparse_depth`/`sparse_depth_mask` are popped so they never leak into
+        # obtain_history_memory -> pts_bbox_head(..., **data). Always pop so that, even
+        # when the head is disabled, no stray key reaches the downstream head.
+        sparse_depth = data.pop("sparse_depth", None)
+        sparse_depth_mask = data.pop("sparse_depth_mask", None)
+        loss_aux_depth = None
+        if self.use_aux_depth and self.aux_depth_head is not None and sparse_depth is not None:
+            G = self.num_frame_backbone_grads
+            rec_feats = data["img_feats"][:, -G:]  # (B, G, N, C, Hf, Wf), grad frames
+            B, _, N, C, Hf, Wf = rec_feats.shape
+            feat = rec_feats.reshape(B * G * N, C, Hf, Wf)
+            sd = sparse_depth[:, -G:].reshape(B * G * N, Hf, Wf).to(feat.device)
+            sdm = sparse_depth_mask[:, -G:].reshape(B * G * N, Hf, Wf).to(feat.device)
+            loss_aux_depth = self.aux_depth_head.loss(feat, sd, sdm)
+
         losses = self.obtain_history_memory(
             gt_bboxes_3d, gt_labels_3d, gt_bboxes, gt_bboxes_labels, img_metas, centers_2d, depths, **data
         )
+        if loss_aux_depth is not None:
+            losses["loss_aux_depth"] = loss_aux_depth
         return losses
 
     def forward_test(self, img_metas, **data):
