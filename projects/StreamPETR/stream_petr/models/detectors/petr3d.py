@@ -321,8 +321,15 @@ class Petr3D(MVXTwoStageDetector):
             rec_feats = data["img_feats"][:, -G:]  # (B, G, N, C, Hf, Wf), grad frames
             B, _, N, C, Hf, Wf = rec_feats.shape
             feat = rec_feats.reshape(B * G * N, C, Hf, Wf)
-            sd = sparse_depth[:, -G:].reshape(B * G * N, Hf, Wf).to(feat.device)
-            sdm = sparse_depth_mask[:, -G:].reshape(B * G * N, Hf, Wf).to(feat.device)
+            # Use the label tensor's own spatial dims, not Hf/Wf: AuxDepthHead may
+            # internally upsample feat before predicting (upsample_factor > 1), so the
+            # label grid built by LoadSparseDepthFromLiDAR can be finer than the neck's
+            # native Hf x Wf.
+            rec_sparse_depth = sparse_depth[:, -G:]
+            rec_sparse_depth_mask = sparse_depth_mask[:, -G:]
+            _, _, _, Hd, Wd = rec_sparse_depth.shape
+            sd = rec_sparse_depth.reshape(B * G * N, Hd, Wd).to(feat.device)
+            sdm = rec_sparse_depth_mask.reshape(B * G * N, Hd, Wd).to(feat.device)
             loss_aux_depth = self.aux_depth_head.loss(feat, sd, sdm)
 
         losses = self.obtain_history_memory(
