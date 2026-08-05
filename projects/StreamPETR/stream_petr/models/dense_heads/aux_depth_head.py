@@ -95,6 +95,12 @@ class AuxDepthHead(nn.Module):
         """
         bin_w = (self.depth_max - self.depth_min) / self.num_depth_bins
         center = (depth - self.depth_min) / bin_w  # fractional bin index, (P,)
+        # Depths outside [depth_min, depth_max] put the Gaussian far off the bin grid;
+        # in fp32 every bin then underflows to exp(-large) == 0 and the row normalizes
+        # to all-zeros, silently contributing zero loss while still counting in the
+        # mean. Clamp so out-of-range labels saturate at the first/last bin instead.
+        # (The loader should still filter with min/max_depth; this is a second layer.)
+        center = center.clamp(0.0, self.num_depth_bins - 1.0)
         bin_ids = torch.arange(self.num_depth_bins, device=depth.device, dtype=depth.dtype)
         dist_sq = (bin_ids.unsqueeze(0) - center.unsqueeze(1)) ** 2  # (P, num_bins)
         target = torch.exp(-dist_sq / (2.0 * self.depth_bin_sigma**2))

@@ -26,7 +26,7 @@ num_workers = 16
 num_epochs = 35
 val_interval = 5
 
-info_train_file_name="t4dataset_j6gen2_infos_train.pkl"
+info_train_file_name="t4dataset_j6gen2_infos_train_with_visibility.pkl"
 # info_val_file_name="t4dataset_j6gen2_infos_val.pkl"
 info_val_file_name="t4dataset_j6gen2_infos_test.pkl"
 info_test_file_name="t4dataset_j6gen2_infos_test.pkl"
@@ -56,7 +56,7 @@ camera_orders = {
 dataset_test_groups = dict(
     _delete_=True,
     # base=(info_test_file_name, True),
-    j6gen2=("t4dataset_j6gen2_infos_val.pkl", True),
+    j6gen2=("t4dataset_j6gen2_infos_test.pkl", True),
 )
 
 # --- Training-time auxiliary depth supervision (does not affect inference) ---
@@ -67,6 +67,29 @@ dataset_test_groups = dict(
 # stay unchanged so evaluation never tries to load point clouds.
 sparse_depth_keys = ["sparse_depth", "sparse_depth_mask"]
 
+# Normalized image-space polygons. x is horizontal, y is vertical.
+# Used twice: Filter3DBoxesinBlindSpot paints these regions black in the images, and
+# LoadSparseDepthFromLiDAR drops depth supervision on them (no point training the
+# depth head to regress LiDAR returns from blacked-out ego-body pixels).
+ego_vehicle_masks = dict(
+    j6gen2=dict(
+        CAM_FRONT_LEFT=[0.64, 1.0, 0.73, 0.65, 0.8, 0.65, 0.79, 0.74, 0.97, 0.83, 1.0, 0.73, 1.0, 1.0],
+        CAM_FRONT_RIGHT=[0.19, 1.0, 0.21, 0.89, 0.38, 0.89, 0.39, 1.0],
+        CAM_BACK_LEFT=[0.0, 0.0, 0.11, 0.0, 0.2, 1.0, 0.0, 1.0],
+        CAM_BACK_RIGHT=[0.88, 0.0, 1.0, 0.0, 1.0, 1.0, 0.8, 1.0],
+    ),
+    largebus=dict(
+        CAM_BACK_LEFT=[0.0, 0.45, 0.12, 0.48, 0.15, 1.0, 0.0, 1.0],
+        CAM_BACK_RIGHT=[0.86, 0.49, 1.0, 0.4, 1.0, 1.0, 0.82, 1.0],
+    ),
+)
+
+# Must match the AuxDepthHead depth_min/depth_max below. Points outside this range
+# carry no usable bin label (beyond ~68m the fp32 Gaussian soft target underflows to
+# all-zeros), so filter them at load time instead of diluting the loss mean.
+depth_min = 1.0
+depth_max = 61.2
+
 train_pipeline = []
 for _t in _base_.train_pipeline:
     _t = dict(_t)
@@ -75,7 +98,15 @@ for _t in _base_.train_pipeline:
     train_pipeline.append(_t)
     if _t["type"] == "mmdet.ResizeCropFlipRotImage":
         # stride halved to match AuxDepthHead's upsample_factor=2 below
-        train_pipeline.append(dict(type="LoadSparseDepthFromLiDAR", stride=_base_.stride // 2, load_dim=5))
+        train_pipeline.append(
+            dict(
+                type="LoadSparseDepthFromLiDAR",
+                stride=_base_.stride // 2,
+                load_dim=5,
+                min_depth=depth_min,
+                max_depth=depth_max,
+            )
+        )
 
 train_collect_keys = _base_.collect_keys + ["img", "prev_exists", "img_metas"] + sparse_depth_keys
 
@@ -86,8 +117,8 @@ model = dict(
         in_channels=256,
         mid_channels=64,
         num_depth_bins=120,
-        depth_min=1.0,
-        depth_max=61.2,
+        depth_min=depth_min,
+        depth_max=depth_max,
         depth_bin_sigma=1.0,  # Gaussian soft-target std, in bins
         upsample_factor=2,  # predict at 2x the neck's native stride
         loss_weight=0.1,  # keep below the 3D detection losses
@@ -173,20 +204,6 @@ param_scheduler = [
 ]
 
 auto_scale_lr = dict(base_batch_size=8, enable=True)
-
-# Normalized image-space polygons. x is horizontal, y is vertical.
-ego_vehicle_masks = dict(
-    j6gen2=dict(
-        CAM_FRONT_LEFT=[0.64, 1.0, 0.73, 0.65, 0.8, 0.65, 0.79, 0.74, 0.97, 0.83, 1.0, 0.73, 1.0, 1.0],
-        CAM_FRONT_RIGHT=[0.19, 1.0, 0.21, 0.89, 0.38, 0.89, 0.39, 1.0],
-        CAM_BACK_LEFT=[0.0, 0.0, 0.11, 0.0, 0.2, 1.0, 0.0, 1.0],
-        CAM_BACK_RIGHT=[0.88, 0.0, 1.0, 0.0, 1.0, 1.0, 0.8, 1.0],
-    ),
-    largebus=dict(
-        CAM_BACK_LEFT=[0.0, 0.45, 0.12, 0.48, 0.15, 1.0, 0.0, 1.0],
-        CAM_BACK_RIGHT=[0.86, 0.49, 1.0, 0.4, 1.0, 1.0, 0.82, 1.0],
-    ),
-)
 
 # model = dict(
 #     pts_bbox_head=dict(

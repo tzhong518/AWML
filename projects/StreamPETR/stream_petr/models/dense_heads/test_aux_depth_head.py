@@ -28,6 +28,17 @@ def test_wider_sigma_spreads_more_mass_to_neighbors():
     assert wide[0, 5] < narrow[0, 5]
 
 
+def test_out_of_range_depth_saturates_at_edge_bins_instead_of_underflowing():
+    # 120 bins over [1.0, 61.2], like the t4 configs. Without clamping, a 100 m label
+    # sits ~76 bins past the last one and every Gaussian term underflows to 0 in fp32,
+    # normalizing to an all-zero row that silently contributes zero loss.
+    head = _make_head(num_depth_bins=120, depth_min=1.0, depth_max=61.2, depth_bin_sigma=1.0)
+    depth = torch.tensor([100.0, 0.2])  # far beyond depth_max / below depth_min
+    target = head._depth_to_soft_target(depth)
+    assert torch.allclose(target.sum(dim=1), torch.ones(2), atol=1e-6)
+    assert target.argmax(dim=1).tolist() == [119, 0]
+
+
 def test_loss_is_lower_for_logits_matching_soft_target():
     head = _make_head(depth_bin_sigma=1.0, loss_weight=1.0)
     feat = torch.zeros(1, 4, 2, 2)

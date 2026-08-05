@@ -209,6 +209,7 @@ class ResizeCropFlipRotImage:
         assert self.data_aug_conf["rot_lim"] == (0.0, 0.0), "Rotation is not currently supported"
 
         resize, resize_dims, crop, flip, rotate = self._sample_augmentation(H, W)
+        ida_mats = []
 
         for i in range(N):
             img = Image.fromarray(np.uint8(imgs[i]))
@@ -246,6 +247,7 @@ class ResizeCropFlipRotImage:
                 new_depths.append(depths)
 
             new_imgs.append(np.array(img).astype(np.float32))
+            ida_mats.append(np.asarray(ida_mat, dtype=np.float32))
             results["intrinsics"][i][:3, :3] = ida_mat @ results["intrinsics"][i]
 
         if self.with_2d:  # sync_2d bbox labels
@@ -254,6 +256,11 @@ class ResizeCropFlipRotImage:
             results["gt_bboxes_labels"] = new_gt_labels
             results["depths"] = new_depths
         results["img"] = new_imgs
+        # Expose the image-space augmentation so later transforms (e.g.
+        # LoadSparseDepthFromLiDAR ego masking) can map original-image coordinates
+        # into the augmented image: p_aug = ida[:2, :2] @ p_orig + ida[:2, 2].
+        results["ida_mats"] = ida_mats
+        results["img_shape_before_ida"] = (H, W)
         results["lidar2img"] = [
             np.concatenate([results["intrinsics"][i] @ results["extrinsics"][i][:3, :], np.array([[0, 0, 0, 1]])])
             for i in range(len(results["extrinsics"]))

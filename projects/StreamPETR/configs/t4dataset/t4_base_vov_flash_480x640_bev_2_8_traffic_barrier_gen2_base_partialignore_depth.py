@@ -66,6 +66,12 @@ dataset_test_groups = dict(
 # stay unchanged so evaluation never tries to load point clouds.
 sparse_depth_keys = ["sparse_depth", "sparse_depth_mask"]
 
+# Must match the AuxDepthHead depth_min/depth_max below. Points outside this range
+# carry no usable bin label (beyond the far plane the fp32 Gaussian soft target
+# underflows to all-zeros), so filter them at load time instead of diluting the loss.
+depth_min = 1.0
+depth_max = 61.2
+
 train_pipeline = []
 for _t in _base_.train_pipeline:
     _t = dict(_t)
@@ -73,7 +79,15 @@ for _t in _base_.train_pipeline:
         _t["collect_keys"] = _base_.collect_keys + ["prev_exists"] + sparse_depth_keys
     train_pipeline.append(_t)
     if _t["type"] == "mmdet.ResizeCropFlipRotImage":
-        train_pipeline.append(dict(type="LoadSparseDepthFromLiDAR", stride=_base_.stride, load_dim=5))
+        train_pipeline.append(
+            dict(
+                type="LoadSparseDepthFromLiDAR",
+                stride=_base_.stride,
+                load_dim=5,
+                min_depth=depth_min,
+                max_depth=depth_max,
+            )
+        )
 
 train_collect_keys = _base_.collect_keys + ["img", "prev_exists", "img_metas"] + sparse_depth_keys
 
@@ -84,8 +98,8 @@ model = dict(
         in_channels=256,
         mid_channels=64,
         num_depth_bins=80,
-        depth_min=1.0,
-        depth_max=61.2,
+        depth_min=depth_min,
+        depth_max=depth_max,
         loss_weight=0.1,  # keep below the 3D detection losses
     ),
 )

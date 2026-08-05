@@ -1,6 +1,7 @@
 # autoware-ml
 /data
 /work_dirs
+/pretrained
 
 *.bin
 *.onnx

@@ -227,6 +227,63 @@ def _points_inside_polygon(points, polygon):
         return inside
 
 
+def _normalize_ego_masks(ego_masks):
+    """Validate a {group: {camera: flat_xy_list}} ego-mask config into numpy polygons."""
+    normalized = {}
+    for group, camera_masks in (ego_masks or {}).items():
+        normalized[str(group).lower()] = {
+            str(camera): _normalize_mask_polygon(polygon) for camera, polygon in camera_masks.items()
+        }
+    return normalized
+
+
+def _infer_ego_mask_group(results, ego_masks):
+    """Match an ego-mask group key (e.g. "j6gen2") against sample/image path strings."""
+    if not ego_masks:
+        return None
+
+    parts = []
+    for key in ("frame_idx", "sample_idx", "scene_token"):
+        value = results.get(key)
+        if value is not None:
+            parts.append(str(value))
+    parts.extend(str(path) for path in results.get("img_filename", []))
+    for cam_info in results.get("images", {}).values():
+        if isinstance(cam_info, dict):
+            for key in ("img_path", "sample_data_path", "filename"):
+                value = cam_info.get(key)
+                if value is not None:
+                    parts.append(str(value))
+
+    haystack = " ".join(parts).lower()
+    for group in ego_masks:
+        if group in haystack:
+            return group
+    return None
+
+
+def _polygon_cell_mask(polygon_cells, Hf, Wf):
+    """Rasterize a polygon given in feature-cell coordinates into a (Hf, Wf) bool mask.
+
+    Boundary cells (partially covered by the polygon) are included, so the mask is
+    conservative: supervision is dropped on every cell the polygon touches.
+    """
+    polygon_cells = np.asarray(polygon_cells, dtype=np.float32)
+    try:
+        import cv2
+
+        mask = np.zeros((Hf, Wf), dtype=np.uint8)
+        pts = np.rint(polygon_cells).astype(np.int32)
+        cv2.fillPoly(mask, [pts], 1)
+        cv2.polylines(mask, [pts], isClosed=True, color=1, thickness=1)
+        return mask.astype(bool)
+    except ImportError:
+        xs = (np.arange(Wf, dtype=np.float32) + 0.5)[None, :].repeat(Hf, axis=0)
+        ys = (np.arange(Hf, dtype=np.float32) + 0.5)[:, None].repeat(Wf, axis=1)
+        centers = np.stack([xs.reshape(-1), ys.reshape(-1)], axis=1)
+        return _points_inside_polygon(centers, polygon_cells).reshape(Hf, Wf)
+
+
 def _paint_polygon_mask(img, polygon, color):
     try:
         import cv2
@@ -380,14 +437,43 @@ class LoadSparseDepthFromLiDAR(BaseTransform):
         results["sparse_depth"]:      (N_cam, Hf, Wf) float32, camera-Z in meters (0 where empty)
         results["sparse_depth_mask"]: (N_cam, Hf, Wf) float32, 1 where a point projected, else 0
     When several points fall in the same feature cell, the nearest (min-Z) is kept.
+
+    ``ego_masks`` (same format as ``Filter3DBoxesinBlindSpot``: {group: {camera:
+    flat normalized x/y polygon}}) zeroes the depth label inside the ego-vehicle
+    image regions. Those pixels show the ego body (or are painted black by the
+    blind-spot transform), so LiDAR returns there would train the head to predict
+    depth from uninformative pixels. Polygons are defined on the ORIGINAL image;
+    they are mapped through the recorded ``ida_mats`` (resize/crop/flip) when
+    ``ResizeCropFlipRotImage`` ran earlier in the pipeline.
     """
 
-    def __init__(self, stride=16, load_dim=5, min_depth=0.1, max_depth=None, *args, **kwargs):
+    def __init__(self, stride=16, load_dim=5, min_depth=0.1, max_depth=None, ego_masks=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stride = int(stride)
         self.load_dim = int(load_dim)
         self.min_depth = float(min_depth)
         self.max_depth = None if max_depth is None else float(max_depth)
+        self.ego_masks = _normalize_ego_masks(ego_masks)
+        self._warned_unknown_ego_mask_group = False
+
+    def _ego_cell_mask(self, results, group, cam_name, cam_idx, W, H, Hf, Wf):
+        """Bool (Hf, Wf) mask of feature cells covered by the ego polygon, or None."""
+        polygon = self.ego_masks.get(group, {}).get(cam_name) if group else None
+        if polygon is None:
+            return None
+        pts = polygon.copy()
+        if "ida_mats" in results:
+            # Polygon is normalized on the original image; replay the image aug.
+            H0, W0 = results["img_shape_before_ida"]
+            pts[:, 0] *= W0 - 1
+            pts[:, 1] *= H0 - 1
+            ida = np.asarray(results["ida_mats"][cam_idx], dtype=np.float32)
+            pts = pts @ ida[:2, :2].T + ida[:2, 2]
+        else:
+            # No image aug ran; normalized coords apply to the current image directly.
+            pts[:, 0] *= W - 1
+            pts[:, 1] *= H - 1
+        return _polygon_cell_mask(pts / self.stride, Hf, Wf)
 
     def _load_points(self, pts_filename):
         if not os.path.exists(pts_filename):
@@ -399,6 +485,15 @@ class LoadSparseDepthFromLiDAR(BaseTransform):
     def transform(self, results):
         points = self._load_points(results["pts_filename"])
         points_hom = np.hstack((points, np.ones((points.shape[0], 1), dtype=points.dtype)))
+
+        ego_mask_group = _infer_ego_mask_group(results, self.ego_masks)
+        if self.ego_masks and ego_mask_group is None and not self._warned_unknown_ego_mask_group:
+            print(
+                "[LoadSparseDepthFromLiDAR] ego_masks configured, but no group key matched "
+                "sample/image paths; skip ego masking for unmatched samples."
+            )
+            self._warned_unknown_ego_mask_group = True
+        cam_names = list(results.get("images", {}))
 
         sparse_depth = []
         sparse_depth_mask = []
@@ -429,8 +524,17 @@ class LoadSparseDepthFromLiDAR(BaseTransform):
 
             mask = np.isfinite(depth_map)
             depth_map[~mask] = 0.0
-            sparse_depth.append(depth_map.reshape(Hf, Wf))
-            sparse_depth_mask.append(mask.reshape(Hf, Wf).astype(np.float32))
+            depth_map = depth_map.reshape(Hf, Wf)
+            mask = mask.reshape(Hf, Wf)
+
+            if ego_mask_group is not None and i < len(cam_names):
+                ego_cells = self._ego_cell_mask(results, ego_mask_group, cam_names[i], i, W, H, Hf, Wf)
+                if ego_cells is not None:
+                    depth_map[ego_cells] = 0.0
+                    mask[ego_cells] = False
+
+            sparse_depth.append(depth_map)
+            sparse_depth_mask.append(mask.astype(np.float32))
 
         results["sparse_depth"] = np.stack(sparse_depth).astype(np.float32)
         results["sparse_depth_mask"] = np.stack(sparse_depth_mask).astype(np.float32)
@@ -513,35 +617,14 @@ class Filter3DBoxesinBlindSpot(BaseTransform):
         return self.class_names[label]
 
     def _normalize_ego_masks(self, ego_masks):
-        normalized = {}
-        for group, camera_masks in ego_masks.items():
-            normalized[str(group).lower()] = {
-                str(camera): _normalize_mask_polygon(polygon)
-                for camera, polygon in camera_masks.items()
-            }
-        return normalized
+        return _normalize_ego_masks(ego_masks)
 
     def _infer_ego_mask_group(self, results):
         if not self.ego_masks:
             return None
-
-        parts = []
-        for key in ("frame_idx", "sample_idx", "scene_token"):
-            value = results.get(key)
-            if value is not None:
-                parts.append(str(value))
-        parts.extend(str(path) for path in results.get("img_filename", []))
-        for cam_info in results.get("images", {}).values():
-            if isinstance(cam_info, dict):
-                for key in ("img_path", "sample_data_path", "filename"):
-                    value = cam_info.get(key)
-                    if value is not None:
-                        parts.append(str(value))
-
-        haystack = " ".join(parts).lower()
-        for group in self.ego_masks:
-            if group in haystack:
-                return group
+        group = _infer_ego_mask_group(results, self.ego_masks)
+        if group is not None:
+            return group
         if not self._warned_unknown_ego_mask_group:
             print(
                 "[BlindSpotFilter] ego_masks configured, but no group key matched sample/image paths; "
